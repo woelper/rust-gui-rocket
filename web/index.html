@@ -1,0 +1,104 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- <link rel="stylesheet" href="static/icons.css">
+  <link rel="stylesheet" href="static/material.indigo-pink.min.css">
+  <script defer src="static/material.min.js"></script>
+  <script src="static/vue.js"></script> -->
+</head>
+
+
+<body>
+
+  <div class="mdl-layout__tab-panel is-active"id="app">
+    <!-- Vue works in this div -->
+
+    {{ title }}
+
+    <!-- Iterate tasks with v-for -->
+    <!-- "tasks" is definied on the vue instance (app.tasks) -->
+    <div v-for="task in tasks">
+      <div class="mdl-card mdl-shadow--4dp">
+        <div class="mdl-card__supporting-text">
+        {{task.description}}
+        </div>
+        <div class="mdl-card__supporting-text">
+        Complete? <input type="checkbox" v-model="task.complete">
+        </div>
+      </div>
+    </div>
+
+    <!-- what about adding one? -->
+  <div>
+    <input v-model="active_task.description">
+    <input type="checkbox" v-model="active_task.complete">
+    <!-- well, this could also be in a function... -->
+    <button @click="tasks.push({description:active_task.description, complete: active_task.complete})">add</button>
+    
+    <!-- call save() on the vue instance to save task data to rust -->
+    <button @click="save()">save to rust</button>
+    {{active_task}}
+  </div>
+
+  </div>
+
+
+</body>
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      title: 'To do list',
+      tasks: [],
+      active_task: {description: "desc", complete: false}
+    },
+    mounted: function () {
+      // runs afer vue is mounted
+
+      /*in a function in js "this" is the current object - 
+      in there, we could access "this.tasks" but not in a function that
+      we call below.
+      */
+      var self = this; 
+      fetch('http://localhost:8000/load')
+        .then(function (response) {
+          return response.json();
+        })
+        .then(function (myJson) {
+          console.log(JSON.stringify(myJson));
+          // self has been set to "this" in the outer
+          // scope earlier, that's why it works like that here
+          self.tasks = myJson;
+        });
+    },
+    methods: {
+
+    save: function () {
+      var self = this; 
+      console.log("Saving");
+      let data = {element: "barium"};
+
+      fetch("http://localhost:8000/save", {
+        method: "POST", 
+        body: JSON.stringify(self.tasks)
+      }).then(res => {
+        console.log("Request complete! response:", res);
+      });
+    
+    }
+  }
+
+  }
+  );
+
+</script>
+
+
+</html>

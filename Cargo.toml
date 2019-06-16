@@ -1,0 +1,18 @@
+[package]
+name = "rust-gui-web"
+version = "0.1.0"
+authors = ["Johann Woelper <woelper@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+# # Rocket is a web framework to build web servers, REST endpoints, etc
+rocket = "0.4.1"
+serde = "1.0"
+serde_json = "1.0"
+serde_derive = "1.0"
+lazy_static = "*"
+
+[dependencies.rocket_contrib]
+version = "0.4.1"
+default-features = false
+features = ["json", "serve"]
